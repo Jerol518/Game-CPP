@@ -1,34 +1,33 @@
 #ifndef functions_h
 #define functions_h
 
-#include <iostream>
-using namespace std;
-
 #include "structures.h"
 
 bool UpCharact(const Item& item);
 
-Item ListItems(const int id);
+void SetInventoryItem(Cell& cell, const Item& item);
 
-Enemy ListEnemies(const int id);
+void RemoveInventoryItem(Cell& cell);
 
-void SetItem(Item& item, const string& name, const TypeItem& type, const int& param);
+bool AddInventoryItem(const Item& item);
 
-void RemoveItem(Item& item);
+void AddItem();
 
-void AddItem(const Item& item);
+void EditItem();
+
+void DeleteItem();
+
+void AddEnemy();
+
+void EditEnemy();
+
+void DeleteEnemy();
+
+void EditPlayer();
 
 void NewGame();
 
 void StartGame();
-
-void SavePlayer();
-
-void SaveMap();
-
-void SaveParametr();
-
-void Load();
 
 void Start();
 

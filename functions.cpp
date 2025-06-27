@@ -2,249 +2,477 @@
 using namespace std;
 
 #include <cstdlib>
-#include <fstream>
-#include <string>
+#include <vector>
 
-#include "functions.h"
+#include "show.h"
+#include "saves.h"
 #include "structures.h"
 
+#include "functions.h"
 
 Player player;
 Map map;
 Parametr parametr;
+BoostEnemy boostEnemy;
 
-bool saveGame = false;
+vector<Item> items;
+vector<Enemy> enemies;
 
-string SetStringTypeItem(const TypeItem& type) {
-	switch (type)
-	{
-	case None:
-		return "No type";
-	case Heal:
-		return "Healing";
-	case UpHp:
-		return "Up health";
-	case UpDmg:
-		return "Up damage";
-	case UpSp:
-		return "Up speed";
-	default:
-		break;
-	}
-}
-
-string SetStringLevel(const Level& level) {
-	switch (level)
-	{
-	case easy:
-		return "Easy";
-	case norm:
-		return "Normal";
-	case hard:
-		return "Hard";
-	default:
-		break;
-	}
-}
+bool win = false;
+bool lose = false;
 
 bool UpCharact(const Item& item) {
-	if (item.full) {
-		switch (item.type)
-		{
-		case Heal:
-			if (player.health < player.maxHealth) {
-				player.health += item.parametr;
-				if (player.health > player.maxHealth) {
-					player.health = player.maxHealth;
-				}
+	switch (item.type)
+	{
+	case Heal:
+		if (player.health < player.maxHealth) {
+			player.health += item.parametr;
+			if (player.health > player.maxHealth) {
+				player.health = player.maxHealth;
+			}
 
-				cout << "Healing" << endl << endl;
-				return true;
-			}
-			else {
-				cout << "Health full" << endl << endl;
-			}
-			break;
-		case UpHp:
-			if (player.levelHp < player.maxLevel) {
-				player.maxHealth += item.parametr;
-				player.health += item.parametr;
-				player.levelHp++;
-
-				cout << "Up health" << endl << endl;
-				return true;
-			}
-			else {
-				cout << "Lvl health max" << endl << endl;
-			}
-			break;
-		case UpDmg:
-			if (player.levelDmg < player.maxLevel) {
-				player.damage += item.parametr;
-				player.levelDmg++;
-
-				cout << "Up damage" << endl << endl;
-				return true;
-			}
-			else {
-				cout << "Lvl damage max" << endl << endl;
-			}
-			break;
-		case UpSp:
-			if (player.levelSp < player.maxLevel) {
-				player.speed += item.parametr;
-				player.levelSp++;
-
-				cout << "Up speed" << endl << endl;
-				return true;
-			}
-			else {
-				cout << "Lvl speed max" << endl << endl;
-			}
-			break;
-		default:
-			return false;
-			break;
+			cout << "Healing" << endl << endl;
+			return true;
 		}
+		else {
+			cout << "Health full" << endl << endl;
+		}
+		break;
+	case UpHp:
+		if (player.levelHp < player.maxLevel) {
+			player.maxHealth += item.parametr;
+			player.health += item.parametr;
+			player.levelHp++;
+
+			cout << "Up health" << endl << endl;
+			return true;
+		}
+		else {
+			cout << "Lvl health max" << endl << endl;
+		}
+		break;
+	case UpDmg:
+		if (player.levelDmg < player.maxLevel) {
+			player.damage += item.parametr;
+			player.levelDmg++;
+
+			cout << "Up damage" << endl << endl;
+			return true;
+		}
+		else {
+			cout << "Lvl damage max" << endl << endl;
+		}
+		break;
+	case UpSp:
+		if (player.levelSp < player.maxLevel) {
+			player.speed += item.parametr;
+			player.levelSp++;
+
+			cout << "Up speed" << endl << endl;
+			return true;
+		}
+		else {
+			cout << "Lvl speed max" << endl << endl;
+		}
+		break;
+	default:
+		return false;
+		break;
 	}
 
 	return false;
 }
 
-Item ListItems(const int id) {
+void AddItem() {
 	Item item;
 
-	if (id != 0) {
-		string name;
-		TypeItem type = None;
-		int parametr = 0;
+	cout << "Name" << endl;
+	cout << " : ";
+	cin >> item.name;
+	cout << endl;
 
-		switch (id)
-		{
-		case 1:
-			name = "Apple"; type = Heal; parametr = 1;
-			break;
-		case 2:
-			name = "Pear"; type = Heal; parametr = 1;
-			break;
-		case 3:
-			name = "Mushroom"; type = Heal; parametr = 1;
-			break;
-		case 4:
-			name = "Piece of pie"; type = Heal; parametr = 2;
-			break;
-		case 5:
-			name = "Meat"; type = Heal; parametr = 2;
-			break;
-		case 6:
-			name = "Box of food"; type = Heal; parametr = 3;
-			break;
-		case 7:
-			name = "Flower"; type = UpHp; parametr = 1;
-			break;
-		case 8:
-			name = "Water"; type = UpHp; parametr = 1;
-			break;
-		case 9:
-			name = "Stone"; type = UpDmg; parametr = 1;
-			break;
-		case 10:
-			name = "Branch"; type = UpDmg; parametr = 1;
-			break;
-		case 11:
-			name = "Leaf"; type = UpSp; parametr = 1;
-			break;
-		case 12:
-			name = "Feather"; type = UpSp; parametr = 1;
-			break;
-		default:
-			break;
-		}
+	int typeNumb;
+	cout << "Type:" << endl;
+	ShowTypeItem();
+	cout << " : ";
+	cin >> typeNumb;
+	cout << endl;
 
-		item.full = true;
-		item.id = id;
-		item.name = name;
-		item.type = type;
-		item.parametr = parametr;
+	if (typeNumb >= 1 && typeNumb <= 4) {
+		item.type = (TypeItem)typeNumb;
+	}
+	else {
+		item.type = Heal;
 	}
 
-	return item;
+	cout << "Parametr" << endl;
+	cout << " : ";
+	cin >> item.parametr;
+	cout << endl;
+
+	items.push_back(item);
+
+	SaveItems(items);
 }
 
-Enemy ListEnemies(const int id) {
+void EditItem() {
+	bool edit = true;
+	while (true) {
+		if (edit) {
+			cout << "0. Back" << endl;
+			ShowAllItems(items);
+			edit = false;
+		}
+
+		int choice;
+		cout << " : ";
+		cin >> choice;
+
+		if (choice == 0) {
+			cout << endl;
+			return;
+		}
+
+		if (choice >= 1 && choice <= items.size() - 1) {
+			cout << endl;
+
+			Item item;
+
+			cout << "Name" << endl;
+			cout << " : ";
+			cin >> item.name;
+			cout << endl;
+
+			int typeNumb;
+			cout << "Type:" << endl;
+			ShowTypeItem();
+			cout << " : ";
+			cin >> typeNumb;
+			cout << endl;
+
+			if (typeNumb >= 1 && typeNumb <= 4) {
+				item.type = (TypeItem)typeNumb;
+			}
+			else {
+				item.type = Heal;
+			}
+
+			cout << "Parametr" << endl;
+			cout << " : ";
+			cin >> item.parametr;
+			cout << endl;
+
+			items[choice] = item;
+
+			SaveItems(items);
+
+			edit = true;
+		}
+		else {
+			cout << "!";
+		}
+	}
+}
+
+void DeleteItem() {
+	if (items.size() > 1) {
+		bool del = true;
+		while (true) {
+			if (del) {
+				cout << "0. Back" << endl;
+				ShowAllItems(items);
+				del = false;
+			}
+
+			int choice;
+			cout << " : ";
+			cin >> choice;
+
+			if (choice == 0) {
+				cout << endl;
+				return;
+			}
+
+			if (choice >= 1 && choice <= items.size() - 1) {
+				cout << endl;
+
+				items.erase(items.begin() + choice);
+
+				SaveItems(items);
+
+				del = true;
+			}
+			else {
+				cout << "!";
+			}
+		}
+	}
+	else {
+		cout << "Items must be more than 1" << endl << endl;
+	}
+}
+
+void AddEnemy() {
 	Enemy enemy;
 
-	string name;
+	cout << "Name" << endl;
+	cout << " : ";
+	cin >> enemy.name;
+	cout << endl;
 
-	int health = 0;
-	int damage = 0;
-	int speed = 0;
+	cout << "Health" << endl;
+	cout << " : ";
+	cin >> enemy.health;
+	cout << endl;
 
-	Item item;
+	cout << "Damage" << endl;
+	cout << " : ";
+	cin >> enemy.damage;
+	cout << endl;
 
-	switch (id)
-	{
-	case 1:
-		name = "Cobra"; health = 2; damage = 4; speed = 4; item = ListItems(10);
-		break;
-	case 2:
-		name = "Boar"; health = 4; damage = 2; speed = 2; item = ListItems(5);
-		break;
-	case 3:
-		name = "Wolf"; health = 3; damage = 3; speed = 3; item = ListItems(11);
-		break;
-	case 4:
-		name = "Tiger"; health = 4; damage = 2; speed = 4; item = ListItems(6);
-		break;
-	case 5:
-		name = "Bear"; health = 4; damage = 4; speed = 1; item = ListItems(5);
-		break;
-	case 6:
-		name = "Hippo"; health = 6; damage = 1; speed = 2; item = ListItems(8);
-		break;
-	default:
-		break;
+	cout << "Speed" << endl;
+	cout << " : ";
+	cin >> enemy.speed;
+	cout << endl;
+
+	int indexItem;
+	cout << "Drop-down item:" << endl;
+	ShowAllItems(items);
+	cout << " : ";
+	cin >> indexItem;
+	cout << endl;
+
+	if (indexItem >= 1 && indexItem <= items.size() - 1) {
+		enemy.item = items[indexItem];
+	}
+	else {
+		enemy.item = items[1];
 	}
 
-	enemy.name = name;
-	enemy.health = health;
-	enemy.damage = damage;
-	enemy.speed = speed;
-	enemy.item = item;
+	enemies.push_back(enemy);
 
-	return enemy;
+	SaveEnemies(enemies);
 }
 
-void SetItem(Item& item, const string& name, const TypeItem& type, const int& param) {
-	item.full = true;
-	item.name = name;
-	item.type = type;
-	item.parametr = param;
-}
+void EditEnemy() {
+	bool edit = true;
+	while (true) {
+		if (edit) {
+			cout << "0. Back" << endl;
+			ShowAllEnemies(enemies);
+			edit = false;
+		}
 
-void RemoveItem(Item& item) {
-	item.full = false;
-	item.name = "";
-	item.type = None;
-	item.parametr = 0;
-}
+		int choice;
+		cout << " : ";
+		cin >> choice;
 
-void AddItem(const Item& item) {
-	for (int i = 0; i < player.sizeInv; i++) {
-		if (player.inventory[i].full == false) {
-			SetItem(player.inventory[i], item.name, item.type, item.parametr);
-			break;
+		if (choice == 0) {
+			cout << endl;
+			return;
+		}
+
+		if (choice >= 1 && choice <= enemies.size() - 1) {
+			cout << endl;
+
+			Enemy enemy;
+
+			cout << "Name" << endl;
+			cout << " : ";
+			cin >> enemy.name;
+			cout << endl;
+
+			cout << "Health" << endl;
+			cout << " : ";
+			cin >> enemy.health;
+			cout << endl;
+
+			cout << "Damage" << endl;
+			cout << " : ";
+			cin >> enemy.damage;
+			cout << endl;
+
+			cout << "Speed" << endl;
+			cout << " : ";
+			cin >> enemy.speed;
+			cout << endl;
+
+			int indexItem;
+			cout << "Drop-down item:" << endl;
+			ShowAllItems(items);
+			cout << " : ";
+			cin >> indexItem;
+			cout << endl;
+
+			if (indexItem >= 1 && indexItem <= items.size() - 1) {
+				enemy.item = items[indexItem];
+			}
+			else {
+				enemy.item = items[1];
+			}
+
+			enemies[choice] = enemy;
+
+			SaveEnemies(enemies);
+
+			edit = true;
+		}
+		else {
+			cout << "!";
 		}
 	}
 }
 
-void ShowSettings() {
+void DeleteEnemy() {
+	if (enemies.size() > 1) {
+		bool del = true;
+		while (true) {
+			if (del) {
+				cout << "0. Back" << endl;
+				ShowAllEnemies(enemies);
+				del = false;
+			}
+
+			int choice;
+			cout << " : ";
+			cin >> choice;
+
+			if (choice == 0) {
+				cout << endl;
+				return;
+			}
+
+			if (choice >= 1 && choice <= enemies.size() - 1) {
+				cout << endl;
+
+				enemies.erase(enemies.begin() + choice);
+
+				SaveEnemies(enemies);
+
+				del = true;
+			}
+			else {
+				cout << "!";
+			}
+		}
+	}
+	else {
+		cout << "Enemies must be more than 1" << endl << endl;
+	}
+}
+
+void EditPlayer() {
+	bool edit = true;
+	while (true) {
+		if (edit) {
+			cout << "0. Back\n1. Edit a player\n2. Reset a player" << endl;
+			edit = false;
+		}
+
+		int choice;
+		cout << " : ";
+		cin >> choice;
+
+		if (choice == 0) {
+			cout << endl;
+			return;
+		}
+
+		switch (choice)
+		{
+		case 1:
+			cout << endl;
+
+			cout << "Health" << endl;
+			cout << " : ";
+			cin >> parametr.health;
+			cout << endl;
+			cout << "Max health" << endl;
+			cout << " : ";
+			cin >> parametr.maxHealth;
+			cout << endl;
+
+			cout << "Damage" << endl;
+			cout << " : ";
+			cin >> parametr.damage;
+			cout << endl;
+			cout << "Max damage" << endl;
+			cout << " : ";
+			cin >> parametr.maxDamage;
+			cout << endl;
+
+			cout << "Speed" << endl;
+			cout << " : ";
+			cin >> parametr.speed;
+			cout << endl;
+			cout << "Max speed" << endl;
+			cout << " : ";
+			cin >> parametr.maxSpeed;
+			cout << endl;
+
+			cout << "Level healht" << endl;
+			cout << " : ";
+			cin >> parametr.levelHp;
+			cout << endl;
+			cout << "Level damage" << endl;
+			cout << " : ";
+			cin >> parametr.levelDmg;
+			cout << endl;
+			cout << "Level speed" << endl;
+			cout << " : ";
+			cin >> parametr.levelSp;
+			cout << endl;
+			cout << "Max level" << endl;
+			cout << " : ";
+			cin >> parametr.maxLevel;
+			cout << endl;
+
+			cout << "Size inventory" << endl;
+			cout << " : ";
+			cin >> parametr.sizeInv;
+			cout << endl;
+
+			edit = true;
+			break;
+		case 2:
+			cout << endl;
+
+			parametr.health = 3;
+			parametr.maxHealth = 3;
+
+			parametr.damage = 1;
+			parametr.maxDamage = 4;
+
+			parametr.speed = 1;
+			parametr.maxSpeed = 4;
+
+			parametr.levelHp = 1;
+			parametr.levelDmg = 1;
+			parametr.levelSp = 1;
+			parametr.maxLevel = 4;
+
+			parametr.sizeInv = 8;
+
+			edit = true;
+			break;
+		default:
+			cout << "!";
+			break;
+		}
+	}
+
+	SaveParametr(parametr);
+}
+
+void Settings() {
 	int select = true;
 	while (true) {
 		if (select) {
 			cout << "0. Back" << endl;
-			cout << "1. Difficulty level (" << SetStringLevel(parametr.level) << ")" << endl;
-			cout << "2. Board size (" << map.row << "x" << map.col << ")" << endl;
+			cout << "1. Difficulty level (" << SetStringLevel(parametr.level) << ") (Only works in a new game)" << endl;
+			cout << "2. Board size (" << parametr.row << "x" << parametr.col << ") (Only works in a new game)" << endl;
+			cout << "3. Statistics" << endl;
+			cout << "4. Edit game" << endl;
 
 			select = false;
 		}
@@ -317,6 +545,8 @@ void ShowSettings() {
 				}
 			}
 
+			SaveParametr(parametr);
+
 			select = true;
 			break;
 		case 2:
@@ -350,6 +580,147 @@ void ShowSettings() {
 			parametr.row = row;
 			parametr.col = col;
 
+			SaveParametr(parametr);
+
+			select = true;
+			break;
+		case 3:
+			cout << endl;
+
+			cout << "Number of games played : " << endl;
+			cout << "Number of wins : " << endl;
+			cout << "Number of lesions : " << endl;
+			cout << "Number of enemies defeated : " << endl;
+			cout << "Number of items collected : " << endl;
+			cout << "Number of items used : " << endl;
+			cout << "Number of open cells : " << endl;
+			cout << "Number of cells passed : " << endl;
+			cout << endl;
+
+			{
+				bool showStats = true;
+				while (true) {
+					if (showStats) {
+						cout << "0. Back\n1. Games played\n2. Defeated enemies\n3. Collected items\n4. Items used" << endl;
+						showStats = false;
+					}
+
+					cout << " : ";
+					cin >> choice;
+
+					if (choice == 0) {
+						cout << endl;
+						break;
+					}
+
+					switch (choice)
+					{
+					case 1:
+						cout << endl;
+
+						showStats = true;
+						break;
+					case 2:
+						cout << endl;
+
+						showStats = true;
+						break;
+					case 3:
+						cout << endl;
+
+						showStats = true;
+						break;
+					case 4:
+						cout << endl;
+
+						showStats = true;
+						break;
+					default:
+						cout << "!";
+						break;
+					}
+				}
+			}
+
+			select = true;
+			break;
+		case 4:
+			cout << endl;
+
+			{
+				bool edit = true;
+				while (true) {
+					if (edit) {
+						cout << "0. Back\n1. Add an item\n2. Edit item\n3. Delete an item\n4. Add an enemy\n5. Edit the enemy\n6. Delete an enemy\n7. Edit a player (Only works in a new game)" << endl;
+						edit = false;
+					}
+
+					cout << " : ";
+					cin >> choice;
+
+					if (choice == 0) {
+						cout << endl;
+						break;
+					}
+
+					switch (choice)
+					{
+					case 1:
+						cout << endl;
+
+						AddItem();
+
+						edit = true;
+						break;
+					case 2:
+						cout << endl;
+
+						EditItem();
+
+						edit = true;
+						break;
+					case 3:
+						cout << endl;
+
+						DeleteItem();
+
+						edit = true;
+						break;
+					case 4:
+						cout << endl;
+
+						AddEnemy();
+
+						edit = true;
+						break;
+					case 5:
+						cout << endl;
+
+						EditEnemy();
+
+						edit = true;
+						break;
+					case 6:
+						cout << endl;
+
+						DeleteEnemy();
+
+						edit = true;
+						break;
+					case 7:
+						cout << endl;
+
+						EditPlayer();
+
+						edit = true;
+						break;
+					default:
+						cout << "!";
+						break;
+					}
+				}
+			}
+
 			select = true;
 			break;
 		default:
@@ -359,71 +730,14 @@ void ShowSettings() {
 	}
 }
 
-void ShowBoard() {
-	for (int i = 0; i < map.col; i++) {
-		for (int j = 0; j < map.row; j++) {
-			cout << "----";
-		}
-		cout << "-" << endl;
-
-		for (int j = 0; j < map.row; j++) {
-			if (map.point.x == j && map.point.y == i) {
-				cout << "| X ";
-			}
-			else if (map.cells[i][j]) {
-				cout << "| ? ";
-			}
-			else {
-				cout << "|   ";
-			}
-		}
-		cout << "|" << endl;
-	}
-
-	for (int j = 0; j < map.row; j++) {
-		cout << "----";
-	}
-	cout << "-" << endl << endl;
-}
-
-void ShowCharactPlayer() {
-	cout << "Hp  : " << player.health << "/" << player.maxHealth << "    Lvl : " << player.levelHp << "/" << player.maxLevel << endl;
-	cout << "Dmg : " << player.damage << "/" << player.maxDamage << "    Lvl : " << player.levelDmg << "/" << player.maxLevel << endl;
-	cout << "Sp  : " << player.speed << "/" << player.maxSpeed << "    Lvl : " << player.levelSp << "/" << player.maxLevel << endl;
-	cout << endl;
-}
-
-void ShowInventory() {
-	ShowCharactPlayer();
-
-	cout << "0. Back" << endl;
-	for (int i = 0; i < player.sizeInv; i++) {
-		if (player.inventory[i].full) {
-			cout << i + 1 << " - " << player.inventory[i].name << " (" << SetStringTypeItem(player.inventory[i].type) << " +" << player.inventory[i].parametr << ")" << endl;
-		}
-		else {
-			cout << i + 1 << endl;
-		}
-	}
-}
-
-void ShowItems() {
-	for (int i = 0; i < player.sizeInv; i++) {
-		if (player.inventory[i].full) {
-			cout << i + 1 << " - " << player.inventory[i].name << " (" << SetStringTypeItem(player.inventory[i].type) << " +" << player.inventory[i].parametr << ")" << endl;
-		}
-		else {
-			cout << i + 1 << endl;
-		}
-	}
-	cout << endl;
-}
-
 void Menu() {
 	bool select = true;
 	while (true) {
 		if (select) {
-			cout << "1. New game\n2. Continue\n3. Settings\n4. Quit" << endl;
+			cout << "1. New game" << endl;
+			cout << "2. Continue " << (parametr.saveGame ? "+" : "-") << endl;
+			cout << "3. Settings" << endl;
+			cout << "4. Quit" << endl;
 
 			select = false;
 		}
@@ -445,7 +759,7 @@ void Menu() {
 			break;
 		case 2:
 			cout << endl;
-			if (saveGame) {
+			if (parametr.saveGame) {
 				StartGame();
 			}
 			else {
@@ -455,7 +769,7 @@ void Menu() {
 			break;
 		case 3:
 			cout << endl;
-			ShowSettings();
+			Settings();
 			select = true;
 			break;
 		default:
@@ -468,10 +782,10 @@ void Menu() {
 void SteppedCell() {
 	map.countMove++;
 
-	int randNumb = 1 + rand() % 24;
+	int randNumb = 1 + rand() % 4;
 
-	if (randNumb >= 1 && randNumb <= 12) {
-		Item item = ListItems(randNumb);
+	if (randNumb == 1 || randNumb == 2) {
+		Item item = items[1 + rand() % (items.size() - 1)];
 		
 		cout << "You found the " << item.name << " (" << SetStringTypeItem(item.type) << " +" << item.parametr << ")" << endl << endl;;
 		cout << "1. Collect\n2. Use\n3. Drop" << endl;
@@ -486,15 +800,12 @@ void SteppedCell() {
 			switch (choice)
 			{
 			case 1:
-				if (player.quantItems < player.sizeInv) {
-					AddItem(item);
-					player.quantItems++;
-
-					SavePlayer();
+				if (AddInventoryItem(item)) {
+					SavePlayer(player);
 
 					cout << endl << "Collected" << endl << endl;
 
-					ShowItems();
+					ShowInventoryItems(player);
 					
 					back = true;
 				}
@@ -505,9 +816,9 @@ void SteppedCell() {
 			case 2:
 				cout << endl;
 				if (UpCharact(item)) {
-					SavePlayer();
+					SavePlayer(player);
 
-					ShowCharactPlayer();
+					ShowCharactPlayer(player);
 
 					back = true;
 				}
@@ -526,13 +837,13 @@ void SteppedCell() {
 			}
 		}
 	}
-	else if (randNumb >= 13 && randNumb <= 18) {
+	else if (randNumb == 3) {
 		if (map.countMove > 10) {
-			Enemy enemy = ListEnemies(randNumb - 12);
+			Enemy enemy = enemies[1 + rand() % (enemies.size() - 1)];
 
-			enemy.health += parametr.boostHpEnemy;
-			enemy.damage += parametr.boostDmgEnemy;
-			enemy.speed+= parametr.boostSpEnemy;
+			enemy.health += boostEnemy.boostHp;
+			enemy.damage += boostEnemy.boostDmg;
+			enemy.speed+= boostEnemy.boostSp;
 
 			cout << "You are under attack " << enemy.name << "!" << endl << endl;
 
@@ -567,7 +878,7 @@ void SteppedCell() {
 						cout << endl << "You attacked!" << endl << endl;
 
 						if (enemy.health <= 0) {
-							AddItem(enemy.item);
+							AddInventoryItem(enemy.item);
 
 							cout << "The enemy was defeated!" << endl << endl;
 
@@ -591,7 +902,7 @@ void SteppedCell() {
 
 					break;
 				case 3:
-					ShowInventory();
+					ShowInventory(player);
 
 					while (true) {
 						int choice;
@@ -605,15 +916,14 @@ void SteppedCell() {
 						}
 
 						bool backInv = false;
-						if (choice >= 1 && choice <= 8) {
+						if (choice >= 1 && choice <= player.sizeInv) {
 							cout << endl;
-							if (UpCharact(player.inventory[choice - 1])) {
-								RemoveItem(player.inventory[choice - 1]);
-								player.quantItems--;
+							if (player.inventory[choice - 1].full && UpCharact(player.inventory[choice - 1].item)) {
+								RemoveInventoryItem(player.inventory[choice - 1]);
 
-								SavePlayer();
+								SavePlayer(player);
 
-								ShowCharactPlayer();
+								ShowCharactPlayer(player);
 
 								backInv = true;
 							}
@@ -654,6 +964,7 @@ void SteppedCell() {
 					if (player.health <= 0) {
 						cout << "You were defeated!" << endl << endl;
 
+						lose = true;
 						back = true;
 					}
 				}
@@ -666,7 +977,7 @@ void SteppedCell() {
 				}
 			}
 
-			SavePlayer();
+			SavePlayer(player);
 		}
 		else {
 			cout << "Nothing found" << endl << endl;
@@ -679,7 +990,7 @@ void SteppedCell() {
 
 
 void Move() {
-	ShowBoard();
+	ShowBoard(map);
 	
 	bool move = true;
 	while (true) {
@@ -750,24 +1061,59 @@ void Move() {
 		}
 
 		if (move) {
-			ShowBoard();
+			ShowBoard(map);
 		}
 
 		if (map.cells[map.point.y][map.point.x]) {
-			map.cells[map.point.y][map.point.x] = false;
-
 			SteppedCell();
 		
-			SaveMap();
-			
-			ShowBoard();
+			if (!lose) { 
+				map.cells[map.point.y][map.point.x] = false;
+				map.quantCells--;
 
+				ShowBoard(map); 
+			}
+			
+			SaveMap(map);
+
+			if (map.quantCells <= 0 && !lose) {
+				win = true;
+			}
+
+			if (win || lose) {
+				break;
+			}
 		}
 	}
 }
 
+void SetInventoryItem(Cell& cell, const Item& item) {
+	cell.full = true;
+	cell.item.id = item.id;
+	cell.item.name = item.name;
+	cell.item.type = item.type;
+	cell.item.parametr = item.parametr;
+}
+
+void RemoveInventoryItem(Cell& cell) {
+	cell.full = false;
+	cell.item.name = "";
+	cell.item.type = None;
+	cell.item.parametr = 0;
+}
+
+bool AddInventoryItem(const Item& item) {
+	for (int i = 0; i < player.sizeInv; i++) {
+		if (player.inventory[i].full == false) {
+			SetInventoryItem(player.inventory[i], item);
+			return true;
+		}
+	}
+	return false;
+}
+
 void Inventory() {
-	ShowInventory();
+	ShowInventory(player);
 	
 	while (true) {
 		int choice;
@@ -779,15 +1125,14 @@ void Inventory() {
 			break;
 		}
 
-		if (choice >= 1 && choice <= 8) {
+		if (choice >= 1 && choice <= player.sizeInv) {
 			cout << endl;
-			if (UpCharact(player.inventory[choice - 1])) {
-				RemoveItem(player.inventory[choice - 1]);
-				player.quantItems--;
+			if (player.inventory[choice - 1].full && UpCharact(player.inventory[choice - 1].item)) {
+				RemoveInventoryItem(player.inventory[choice - 1]);
 
-				SavePlayer();
+				SavePlayer(player);
 
-				ShowInventory();
+				ShowInventory(player);
 			}
 			else {
 				cout << "Cell is empty" << endl << endl;
@@ -800,31 +1145,55 @@ void Inventory() {
 }
 
 void NewGame() {
-	player.health = 3;
-	player.maxHealth = 3;
+	if (parametr.saveGame) {
+		cout << "Your past game will be deleted. Are you sure?" << endl;
+		cout << "0. Back\n1. Create a new game" << endl;
 
-	player.damage = 1;
-	player.maxDamage = 4;
+		bool back = false;
+		while (true) {
+			int choice;
+			cout << " : ";
+			cin >> choice;
 
-	player.speed = 1;
-	player.maxSpeed = 4;
+			if (choice == 0) {
+				back = true;
+				break;
+			}
+			else if (choice == 1) {
+				break;
+			}
+			else {
+				cout << "!";
+			}
+		}
 
-	player.levelHp = 1;
-	player.levelDmg = 1;
-	player.levelSp = 1;
-	player.maxLevel = 4;
+		cout << endl;
+		if (back) {
+			return;
+		}
+	}
 
-	player.quantItems = 0;
-	player.sizeInv = 8;
-	player.inventory = new Item[player.sizeInv];
+	player.health = parametr.health;
+	player.maxHealth = parametr.maxHealth;
 
+	player.damage = parametr.damage;
+	player.maxDamage = parametr.maxDamage;
 
-	map.countMove = 0;
-	map.point.x = rand() % map.row;
-	map.point.y = rand() % map.col;
+	player.speed = parametr.speed;
+	player.maxSpeed = parametr.maxSpeed;
+
+	player.levelHp = parametr.levelHp;
+	player.levelDmg = parametr.levelDmg;
+	player.levelSp = parametr.levelSp;
+	player.maxLevel = parametr.maxLevel;
+
+	player.sizeInv = parametr.sizeInv;
+	player.inventory = new Cell[player.sizeInv];
+
 
 	map.row = parametr.row;
 	map.col = parametr.col;
+	map.quantCells = map.row * map.col - 1;
 	for (int i = 0; i < map.col; i++) {
 		map.cells[i] = new bool[map.row];
 		for (int j = 0; j < map.row; j++) {
@@ -832,13 +1201,21 @@ void NewGame() {
 		}
 	}
 
+	map.countMove = 0;
+	map.point.x = rand() % map.row;
+	map.point.y = rand() % map.col;
 	map.cells[map.point.y][map.point.x] = false;
 
-	SavePlayer();
-	SaveMap();
-	SaveParametr();
+	boostEnemy.boostHp = parametr.boostHpEnemy;
+	boostEnemy.boostDmg = parametr.boostDmgEnemy;
+	boostEnemy.boostSp = parametr.boostSpEnemy;
 
-	saveGame = true;
+	parametr.saveGame = true;
+
+	SavePlayer(player);
+	SaveMap(map);
+	SaveParametr(parametr);
+	SaveBoostEnemy(boostEnemy);
 
 	StartGame();
 }
@@ -847,7 +1224,7 @@ void StartGame() {
 	bool select = true;
 	while (true) {
 		if (select) {
-			ShowBoard();
+			ShowBoard(map);
 			
 			cout << "1. Move\n2. Inventory\n3. Exit" << endl;
 			select = false;
@@ -878,218 +1255,35 @@ void StartGame() {
 			cout << "!";
 			break;
 		}
-	}
-}
 
-void SavePlayer() {
-	ofstream filePlayer("Player.txt");
-
-	if (!filePlayer) {
-		cout << "No open file (1.0)\nNo save player" << endl << endl;
-		return;
-	}
-
-	string textSave;
-
-	textSave += to_string(player.health) + '\n';
-	textSave += to_string(player.maxHealth) + '\n';
-
-	textSave += to_string(player.damage) + '\n';
-	textSave += to_string(player.maxDamage) + '\n';
-
-	textSave += to_string(player.speed) + '\n';
-	textSave += to_string(player.maxSpeed) + '\n';
-
-	textSave += to_string(player.levelHp) + '\n';
-	textSave += to_string(player.levelDmg) + '\n';
-	textSave += to_string(player.levelSp) + '\n';
-	textSave += to_string(player.maxHealth) + '\n';
-
-	textSave += to_string(player.quantItems) + '\n';
-	textSave += to_string(player.sizeInv) + '\n';
-	for (int i = 0; i < player.sizeInv; i++) {
-		textSave += to_string(player.inventory[i].id) + ' ';
-	}
-	textSave += '\n';
+		if (win) {
+			cout << "You win! :)" << endl << endl;
 
 
-	filePlayer << textSave;
-}
+			win = false;
+			parametr.saveGame = false;
 
-void SaveMap() {
-	ofstream fileMap("Map.txt");
-
-	if (!fileMap) {
-		cout << "No open file (1.1)\nNo save map" << endl << endl;
-		return;
-	}
-
-	string textSave;
-
-	textSave += to_string(map.countMove) + '\n';
-	textSave += to_string(map.point.x) + ' ' + to_string(map.point.y) + '\n';
-
-	textSave += to_string(map.row) + '\n';
-	textSave += to_string(map.col) + '\n';
-	for (int i = 0; i < map.col; i++) {
-		for (int j = 0; j < map.row; j++) {
-			textSave += to_string(map.cells[i][j]) + ' ';
+			SaveParametr(parametr);
+			break;
 		}
-		textSave += '\n';
-	}
+		else if (lose) {
+			cout << "You lose :(" << endl << endl;
 
-	fileMap << textSave;
-}
+			lose = false;
+			parametr.saveGame = false;
 
-void SaveParametr() {
-	ofstream fileParametr("Parametr.txt");
-
-	if (!fileParametr) {
-		cout << "No open file (1.2)\nNo save parametr" << endl << endl;
-		return;
-	}
-
-	string textSave;
-
-	textSave += to_string(parametr.level) + '\n';
-
-	textSave += to_string(parametr.boostHpEnemy) + '\n';
-	textSave += to_string(parametr.boostDmgEnemy) + '\n';
-	textSave += to_string(parametr.boostSpEnemy) + '\n';
-
-	textSave += to_string(parametr.row) + '\n';
-	textSave += to_string(parametr.col) + '\n';
-
-	fileParametr << textSave;
-}
-
-void Load() {
-	bool load = true;
-	{
-		ifstream filePlayer("Player.txt");
-
-		if (!filePlayer) {
-			load = false;
-		}
-		else {
-			string textLoad;
-
-			getline(filePlayer, textLoad);
-			player.health = stoi(textLoad);
-			getline(filePlayer, textLoad);
-			player.maxHealth = stoi(textLoad);
-
-			getline(filePlayer, textLoad);
-			player.damage = stoi(textLoad);
-			getline(filePlayer, textLoad);
-			player.maxDamage = stoi(textLoad);
-
-			getline(filePlayer, textLoad);
-			player.speed = stoi(textLoad);
-			getline(filePlayer, textLoad);
-			player.maxSpeed = stoi(textLoad);
-
-			getline(filePlayer, textLoad);
-			player.levelHp = stoi(textLoad);
-			getline(filePlayer, textLoad);
-			player.levelDmg = stoi(textLoad);
-			getline(filePlayer, textLoad);
-			player.levelSp = stoi(textLoad);
-			getline(filePlayer, textLoad);
-			player.maxLevel = stoi(textLoad);
-
-			getline(filePlayer, textLoad);
-			player.quantItems = stoi(textLoad);
-			getline(filePlayer, textLoad);
-			player.sizeInv = stoi(textLoad);
-			for (int i = 0; i < player.sizeInv; i++) {
-				filePlayer >> textLoad;
-				player.inventory[i] = ListItems(stoi(textLoad));
-			}
+			SaveParametr(parametr);
+			break;
 		}
 	}
-
-	{
-		ifstream fileMap("Map.txt");
-
-		if (!fileMap) {
-			load = false;
-		}
-		else {
-			string textLoad;
-
-			getline(fileMap, textLoad);
-			map.countMove = stoi(textLoad);
-			fileMap >> textLoad;
-			fileMap.seekg(ios::cur, 1);
-			map.point.x = stoi(textLoad);
-			getline(fileMap, textLoad);
-			map.point.y = stoi(textLoad);
-
-			getline(fileMap, textLoad);
-			map.row = stoi(textLoad);
-			getline(fileMap, textLoad);
-			map.col = stoi(textLoad);
-			for (int i = 0; i < map.col; i++) {
-				map.cells[i] = new bool[map.row];
-				for (int j = 0; j < map.row; j++) {
-					fileMap >> textLoad;
-					if (textLoad == "1") {
-						map.cells[i][j] = true;
-					}
-					else {
-						map.cells[i][j] = false;
-					}
-				}
-			}
-		}
-	}
-
-	{
-		ifstream fileParametr("Parametr.txt");
-
-		if (!fileParametr) {
-			load = false;
-		}
-		else {
-			string textLoad;
-
-			getline(fileParametr, textLoad);
-			parametr.level = (Level) stoi(textLoad);
-
-			getline(fileParametr, textLoad);
-			parametr.boostHpEnemy = stoi(textLoad);
-			getline(fileParametr, textLoad);
-			parametr.boostDmgEnemy = stoi(textLoad);
-			getline(fileParametr, textLoad);
-			parametr.boostSpEnemy = stoi(textLoad);
-
-			getline(fileParametr, textLoad);
-			parametr.row = stoi(textLoad);
-			getline(fileParametr, textLoad);
-			parametr.col = stoi(textLoad);
-		}
-	}
-
-	if (load) {
-		saveGame = true;
-	}
-}
-
-void Delete() {
-	delete[] player.inventory;
-
-	for (int i = 0; i < map.col; i++) {
-		delete[] map.cells[i];
-	}
-	delete[] map.cells;
 }
 
 void Start() {
-	Load();
+	if (Load(items, enemies, player, map, parametr, boostEnemy)) {
 
-	Menu();
+		Menu();
 
-	Delete();
+		Delete(player, map);
+	}
 }
 
