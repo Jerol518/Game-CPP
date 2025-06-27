@@ -7,7 +7,7 @@ using namespace std;
 
 #include "structures.h"
 
-Item LoadItems(const int id) {
+Item ListItems(const int id) {
 	Item item;
 
 	if (id != 0) {
@@ -66,7 +66,7 @@ Item LoadItems(const int id) {
 	return item;
 }
 
-Enemy LoadEnemies(const int id, vector<Item>& items) {
+Enemy ListEnemies(const int id, vector<Item>& items) {
 	Enemy enemy;
 
 	string name = "Enemy";
@@ -108,6 +108,52 @@ Enemy LoadEnemies(const int id, vector<Item>& items) {
 	enemy.item = item;
 
 	return enemy;
+}
+
+void SaveItems(vector<Item>& items) {
+	ofstream fileItems("Items.txt");
+
+	if (!fileItems) {
+		cout << "No open file (1.6)\nNo save items" << endl << endl;
+		return;
+	}
+
+	string textSave;
+
+	textSave += to_string(items.size()) + '\n';
+	for (int i = 0; i < items.size(); i++) {
+		textSave += items[i].name + ' ';
+		textSave += to_string(items[i].type) + ' ';
+		textSave += to_string(items[i].parametr) + ' ';
+		textSave += '\n';
+	}
+
+
+	fileItems << textSave;
+}
+
+void SaveEnemies(vector<Enemy>& enemies) {
+	ofstream fileEnemies("Enemies.txt");
+
+	if (!fileEnemies) {
+		cout << "No open file (1.7)\nNo save enemies" << endl << endl;
+		return;
+	}
+
+	string textSave;
+
+	textSave += to_string(enemies.size()) + '\n';
+	for (int i = 0; i < enemies.size(); i++) {
+		textSave += enemies[i].name + ' ';
+		textSave += to_string(enemies[i].health) + ' ';
+		textSave += to_string(enemies[i].damage) + ' ';
+		textSave += to_string(enemies[i].speed) + ' ';
+		textSave += to_string(enemies[i].item.id) + ' ';
+		textSave += '\n';
+	}
+
+
+	fileEnemies << textSave;
 }
 
 void SavePlayer(Player& player) {
@@ -210,11 +256,56 @@ void SaveParametr(Parametr& parametr) {
 	fileParametr << textSave;
 }
 
+void SaveStats(Stats& stats) {
+	ofstream fileStats("Stats.txt");
+
+	if (!fileStats) {
+		cout << "No open file (1.4)\nNo save stats" << endl << endl;
+		return;
+	}
+
+	string textSave;
+
+	textSave += to_string(stats.countPlay) + '\n';
+	textSave += to_string(stats.countWin) + '\n';
+	textSave += to_string(stats.countLose) + '\n';
+
+	textSave += to_string(stats.countKillEnemy) + '\n';
+
+	textSave += to_string(stats.countCollectItem) + '\n';
+	textSave += to_string(stats.countUseItem) + '\n';
+
+	textSave += to_string(stats.countPassCell) + '\n';
+	textSave += to_string(stats.countOpenCell) + '\n';
+
+	textSave += to_string(stats.GamePlayed.size()) + '\n';
+	for (int i = 0; i < stats.GamePlayed.size(); i++) {
+		textSave += to_string(stats.GamePlayed[i]) + '\n';
+	}
+
+	textSave += to_string(stats.EnemyKillCount.size()) + '\n';
+	for (int i = 0; i < stats.EnemyKillCount.size(); i++) {
+		textSave += to_string(stats.EnemyKillCount[i]) + '\n';
+	}
+
+	textSave += to_string(stats.ItemCollectCount.size()) + '\n';
+	for (int i = 0; i < stats.ItemCollectCount.size(); i++) {
+		textSave += to_string(stats.ItemCollectCount[i]) + '\n';
+	}
+
+	textSave += to_string(stats.ItemUseCount.size()) + '\n';
+	for (int i = 0; i < stats.ItemUseCount.size(); i++) {
+		textSave += to_string(stats.ItemUseCount[i]) + '\n';
+	}
+
+	fileStats << textSave;
+}
+
 void SaveBoostEnemy(BoostEnemy& boostEnemy) {
 	ofstream fileBoostEnemy("BoostEnemy.txt");
 
 	if (!fileBoostEnemy) {
-		cout << "No open file (1.3)\nNo save boost enemy" << endl << endl;
+		cout << "No open file (1.5)\nNo save boost enemy" << endl << endl;
 		return;
 	}
 
@@ -227,292 +318,335 @@ void SaveBoostEnemy(BoostEnemy& boostEnemy) {
 	fileBoostEnemy << textSave;
 }
 
-void SaveItems(vector<Item>& items) {
-	ofstream fileItems("Items.txt");
+void LoadItems(vector<Item>& items) {
+	ifstream fileItems("Items.txt");
 
 	if (!fileItems) {
-		cout << "No open file (1.3)\nNo save items" << endl << endl;
-		return;
+		ofstream fileAddItems("Items.txt");
+
+		if (!fileAddItems) {
+			cout << "No open file (2.1)\nNo load items" << endl << endl;
+		}
+
+		for (int i = 0; i <= 12; i++) {
+			items.push_back(ListItems(i));
+		}
+
+		SaveItems(items);
 	}
+	else {
+		string textLoad;
 
-	string textSave;
+		fileItems >> textLoad;
+		const int size = stoi(textLoad);
+		for (int i = 0; i < size; i++) {
+			Item item;
 
-	textSave += to_string(items.size()) + '\n';
-	for (int i = 0; i < items.size(); i++) {
-		textSave += items[i].name + ' ';
-		textSave += to_string(items[i].type) + ' ';
-		textSave += to_string(items[i].parametr) + ' ';
-		textSave += '\n';
+			item.id = i;
+			fileItems >> textLoad;
+			item.name = textLoad;
+			fileItems >> textLoad;
+			item.type = (TypeItem)stoi(textLoad);
+			fileItems >> textLoad;
+			item.parametr = stoi(textLoad);
+
+			items.push_back(item);
+		}
 	}
-
-
-	fileItems << textSave;
 }
 
-void SaveEnemies(vector<Enemy>& enemies) {
-	ofstream fileEnemies("Enemies.txt");
+void LoadEnemies(vector<Enemy>& enemies, vector<Item>& items) {
+	ifstream fileEnemies("Enemies.txt");
 
 	if (!fileEnemies) {
-		cout << "No open file (1.3)\nNo save enemies" << endl << endl;
-		return;
+		ofstream fileAddEnemies("Enemies.txt");
+
+		if (!fileAddEnemies) {
+			cout << "No open file (2.2)\nNo load enemies" << endl << endl;
+		}
+
+		for (int i = 0; i <= 6; i++) {
+			enemies.push_back(ListEnemies(i, items));
+		}
+
+		SaveEnemies(enemies);
 	}
+	else {
+		string textLoad;
 
-	string textSave;
+		fileEnemies >> textLoad;
+		const int size = stoi(textLoad);
+		for (int i = 0; i < size; i++) {
+			Enemy enemy;
 
-	textSave += to_string(enemies.size()) + '\n';
-	for (int i = 0; i < enemies.size(); i++) {
-		textSave += enemies[i].name + ' ';
-		textSave += to_string(enemies[i].health) + ' ';
-		textSave += to_string(enemies[i].damage) + ' ';
-		textSave += to_string(enemies[i].speed) + ' ';
-		textSave += to_string(enemies[i].item.id) + ' ';
-		textSave += '\n';
+			enemy.id = i;
+			fileEnemies >> textLoad;
+			enemy.name = textLoad;
+			fileEnemies >> textLoad;
+			enemy.health = stoi(textLoad);
+			fileEnemies >> textLoad;
+			enemy.damage = stoi(textLoad);
+			fileEnemies >> textLoad;
+			enemy.speed = stoi(textLoad);
+			fileEnemies >> textLoad;
+			enemy.item = items[stoi(textLoad)];
+
+			enemies.push_back(enemy);
+		}
 	}
-
-
-	fileEnemies << textSave;
 }
 
-bool Load(vector<Item>& items, vector<Enemy>& enemies, Player& player, Map& map, Parametr& parametr, BoostEnemy& boostEnemy) {
-	{
-		ifstream fileItems("Items.txt");
+void LoadPlayer(Player& player, vector<Item>& items) {
+	ifstream filePlayer("Player.txt");
 
-		if (!fileItems) {
-			ofstream fileAddItems("Items.txt");
+	if (filePlayer) {
+		string textLoad;
 
-			if (!fileAddItems) {
-				cout << "No open file (2.1)\nNo load items" << endl << endl;
+		filePlayer >> textLoad;
+		player.health = stoi(textLoad);
+		filePlayer >> textLoad;
+		player.maxHealth = stoi(textLoad);
 
-				return false;
-			}
+		filePlayer >> textLoad;
+		player.damage = stoi(textLoad);
+		filePlayer >> textLoad;
+		player.maxDamage = stoi(textLoad);
 
-			for (int i = 0; i <= 12; i++) {
-				items.push_back(LoadItems(i));
-			}
+		filePlayer >> textLoad;
+		player.speed = stoi(textLoad);
+		filePlayer >> textLoad;
+		player.maxSpeed = stoi(textLoad);
 
-			SaveItems(items);
-		}
-		else {
-			string textLoad;
+		filePlayer >> textLoad;
+		player.levelHp = stoi(textLoad);
+		filePlayer >> textLoad;
+		player.levelDmg = stoi(textLoad);
+		filePlayer >> textLoad;
+		player.levelSp = stoi(textLoad);
+		filePlayer >> textLoad;
+		player.maxLevel = stoi(textLoad);
 
-			fileItems >> textLoad;
-			const int size = stoi(textLoad);
-			for (int i = 0; i < size; i++) {
-				Item item;
-
-				item.id = i;
-				fileItems >> textLoad;
-				item.name = textLoad;
-				fileItems >> textLoad;
-				item.type = (TypeItem)stoi(textLoad);
-				fileItems >> textLoad;
-				item.parametr = stoi(textLoad);
-
-				items.push_back(item);
-			}
-		}
-	}
-
-	{
-		ifstream fileEnemies("Enemies.txt");
-
-		if (!fileEnemies) {
-			ofstream fileAddEnemies("Enemies.txt");
-
-			if (!fileAddEnemies) {
-				cout << "No open file (2.2)\nNo load enemies" << endl << endl;
-
-				return false;
-			}
-
-			for (int i = 0; i <= 6; i++) {
-				enemies.push_back(LoadEnemies(i, items));
-			}
-
-			SaveEnemies(enemies);
-		}
-		else {
-			string textLoad;
-
-			fileEnemies >> textLoad;
-			const int size = stoi(textLoad);
-			for (int i = 0; i < size; i++) {
-				Enemy enemy;
-
-				fileEnemies >> textLoad;
-				enemy.name = textLoad;
-				fileEnemies >> textLoad;
-				enemy.health = stoi(textLoad);
-				fileEnemies >> textLoad;
-				enemy.damage = stoi(textLoad);
-				fileEnemies >> textLoad;
-				enemy.speed = stoi(textLoad);
-				fileEnemies >> textLoad;
-				enemy.item = items[stoi(textLoad)];
-
-				enemies.push_back(enemy);
+		filePlayer >> textLoad;
+		player.sizeInv = stoi(textLoad);
+		for (int i = 0; i < player.sizeInv; i++) {
+			filePlayer >> textLoad;
+			if (textLoad != "0") {
+				player.inventory[i].full = true;
+				player.inventory[i].item = items[stoi(textLoad)];
 			}
 		}
 	}
+}
 
-	{
-		ifstream filePlayer("Player.txt");
+void LoadMap(Map& map) {
+	ifstream fileMap("Map.txt");
 
-		if (filePlayer) {
-			string textLoad;
-
-			filePlayer >> textLoad;
-			player.health = stoi(textLoad);
-			filePlayer >> textLoad;
-			player.maxHealth = stoi(textLoad);
-
-			filePlayer >> textLoad;
-			player.damage = stoi(textLoad);
-			filePlayer >> textLoad;
-			player.maxDamage = stoi(textLoad);
-
-			filePlayer >> textLoad;
-			player.speed = stoi(textLoad);
-			filePlayer >> textLoad;
-			player.maxSpeed = stoi(textLoad);
-
-			filePlayer >> textLoad;
-			player.levelHp = stoi(textLoad);
-			filePlayer >> textLoad;
-			player.levelDmg = stoi(textLoad);
-			filePlayer >> textLoad;
-			player.levelSp = stoi(textLoad);
-			filePlayer >> textLoad;
-			player.maxLevel = stoi(textLoad);
-
-			filePlayer >> textLoad;
-			player.sizeInv = stoi(textLoad);
-			for (int i = 0; i < player.sizeInv; i++) {
-				filePlayer >> textLoad;
-				if (textLoad != "0") {
-					player.inventory[i].full = true;
-					player.inventory[i].item = items[stoi(textLoad)];
-				}
+	if (!fileMap) {
+		for (int i = 0; i < map.col; i++) {
+			map.cells[i] = new bool[map.row];
+			for (int j = 0; j < map.row; j++) {
+				map.cells[i][j] = true;
 			}
 		}
+
+		map.point.x = rand() % map.row;
+		map.point.y = rand() % map.col;
+		map.cells[map.point.y][map.point.x] = false;
 	}
+	else {
+		string textLoad;
 
-	{
-		ifstream fileMap("Map.txt");
-
-		if (!fileMap) {
-			for (int i = 0; i < map.col; i++) {
-				map.cells[i] = new bool[map.row];
-				for (int j = 0; j < map.row; j++) {
+		fileMap >> textLoad;
+		map.row = stoi(textLoad);
+		fileMap >> textLoad;
+		map.col = stoi(textLoad);
+		fileMap >> textLoad;
+		map.quantCells = stoi(textLoad);
+		for (int i = 0; i < map.col; i++) {
+			map.cells[i] = new bool[map.row];
+			for (int j = 0; j < map.row; j++) {
+				fileMap >> textLoad;
+				if (textLoad == "1") {
 					map.cells[i][j] = true;
 				}
-			}
-
-			map.point.x = rand() % map.row;
-			map.point.y = rand() % map.col;
-			map.cells[map.point.y][map.point.x] = false;
-		}
-		else {
-			string textLoad;
-
-			fileMap >> textLoad;
-			map.row = stoi(textLoad);
-			fileMap >> textLoad;
-			map.col = stoi(textLoad);
-			fileMap >> textLoad;
-			map.quantCells = stoi(textLoad);
-			for (int i = 0; i < map.col; i++) {
-				map.cells[i] = new bool[map.row];
-				for (int j = 0; j < map.row; j++) {
-					fileMap >> textLoad;
-					if (textLoad == "1") {
-						map.cells[i][j] = true;
-					}
-					else {
-						map.cells[i][j] = false;
-					}
+				else {
+					map.cells[i][j] = false;
 				}
 			}
+		}
 
-			fileMap >> textLoad;
-			map.countMove = stoi(textLoad);
-			fileMap >> textLoad;
-			map.point.x = stoi(textLoad);
-			fileMap >> textLoad;
-			map.point.y = stoi(textLoad);
+		fileMap >> textLoad;
+		map.countMove = stoi(textLoad);
+		fileMap >> textLoad;
+		map.point.x = stoi(textLoad);
+		fileMap >> textLoad;
+		map.point.y = stoi(textLoad);
+	}
+}
+
+void LoadParametr(Parametr& parametr) {
+	ifstream fileParametr("Parametr.txt");
+
+	if (fileParametr) {
+		string textLoad;
+
+		fileParametr >> textLoad;
+		parametr.saveGame = stoi(textLoad);
+
+		fileParametr >> textLoad;
+		parametr.level = (Level)stoi(textLoad);
+
+		fileParametr >> textLoad;
+		parametr.boostHpEnemy = stoi(textLoad);
+		fileParametr >> textLoad;
+		parametr.boostDmgEnemy = stoi(textLoad);
+		fileParametr >> textLoad;
+		parametr.boostSpEnemy = stoi(textLoad);
+
+		fileParametr >> textLoad;
+		parametr.row = stoi(textLoad);
+		fileParametr >> textLoad;
+		parametr.col = stoi(textLoad);
+
+
+		fileParametr >> textLoad;
+		parametr.health = stoi(textLoad);
+		fileParametr >> textLoad;
+		parametr.maxHealth = stoi(textLoad);
+
+		fileParametr >> textLoad;
+		parametr.damage = stoi(textLoad);
+		fileParametr >> textLoad;
+		parametr.maxDamage = stoi(textLoad);
+
+		fileParametr >> textLoad;
+		parametr.speed = stoi(textLoad);
+		fileParametr >> textLoad;
+		parametr.maxSpeed = stoi(textLoad);
+
+		fileParametr >> textLoad;
+		parametr.levelHp = stoi(textLoad);
+		fileParametr >> textLoad;
+		parametr.levelDmg = stoi(textLoad);
+		fileParametr >> textLoad;
+		parametr.levelSp = stoi(textLoad);
+		fileParametr >> textLoad;
+		parametr.maxLevel = stoi(textLoad);
+
+		fileParametr >> textLoad;
+		parametr.sizeInv = stoi(textLoad);
+	}
+}
+
+void LoadStats(Stats& stats, vector<Item>& items, vector<Enemy>& enemies) {
+	ifstream fileStats("Stats.txt");
+
+	if (!fileStats) {
+		ofstream fileAddStats("Stats.txt");
+
+		if (!fileAddStats) {
+			cout << "No open file (2.3)\nNo load stats" << endl << endl;
+		}
+
+		stats.GamePlayed.push_back(0);
+
+		for (int i = 0; i < enemies.size(); i++) {
+			stats.EnemyKillCount.push_back(0);
+		}
+
+		for (int i = 0; i < items.size(); i++) {
+			stats.ItemCollectCount.push_back(0);
+		}
+
+		for (int i = 0; i < items.size(); i++) {
+			stats.ItemUseCount.push_back(0);
+		}
+
+		SaveStats(stats);
+	}
+	else {
+		string textLoad;
+
+		fileStats >> textLoad;
+		stats.countPlay = stoi(textLoad);
+		fileStats >> textLoad;
+		stats.countWin = stoi(textLoad);
+		fileStats >> textLoad;
+		stats.countLose = stoi(textLoad);
+
+		fileStats >> textLoad;
+		stats.countKillEnemy = stoi(textLoad);
+
+		fileStats >> textLoad;
+		stats.countCollectItem = stoi(textLoad);
+		fileStats >> textLoad;
+		stats.countUseItem = stoi(textLoad);
+
+		fileStats >> textLoad;
+		stats.countPassCell = stoi(textLoad);
+		fileStats >> textLoad;
+		stats.countOpenCell = stoi(textLoad);
+
+		fileStats >> textLoad;
+		int sizeGamePlayed = stoi(textLoad);
+		stats.GamePlayed.push_back(0);
+		for (int i = 0; i < sizeGamePlayed; i++) {
+			fileStats >> textLoad;
+			stats.GamePlayed.push_back(stoi(textLoad));
+		}
+
+		fileStats >> textLoad;
+		int sizeEnemyKillCount = stoi(textLoad);
+		for (int i = 0; i < sizeEnemyKillCount; i++) {
+			fileStats >> textLoad;
+			stats.EnemyKillCount.push_back(stoi(textLoad));
+		}
+
+		fileStats >> textLoad;
+		int sizeItemCollectCount = stoi(textLoad);
+		for (int i = 0; i < sizeItemCollectCount; i++) {
+			fileStats >> textLoad;
+			stats.ItemCollectCount.push_back(stoi(textLoad));
+		}
+
+		fileStats >> textLoad;
+		int sizeItemUseCount = stoi(textLoad);
+		for (int i = 0; i < sizeItemUseCount; i++) {
+			fileStats >> textLoad;
+			stats.ItemUseCount.push_back(stoi(textLoad));
 		}
 	}
+}
 
-	{
-		ifstream fileParametr("Parametr.txt");
+void LoadBoostEnemy(BoostEnemy& boostEnemy) {
+	ifstream fileBoostEnemy("BoostEnemy.txt");
 
-		if (fileParametr) {
-			string textLoad;
+	if (fileBoostEnemy) {
+		string textLoad;
 
-			fileParametr >> textLoad;
-			parametr.saveGame = stoi(textLoad);
-
-			fileParametr >> textLoad;
-			parametr.level = (Level)stoi(textLoad);
-
-			fileParametr >> textLoad;
-			parametr.boostHpEnemy = stoi(textLoad);
-			fileParametr >> textLoad;
-			parametr.boostDmgEnemy = stoi(textLoad);
-			fileParametr >> textLoad;
-			parametr.boostSpEnemy = stoi(textLoad);
-
-			fileParametr >> textLoad;
-			parametr.row = stoi(textLoad);
-			fileParametr >> textLoad;
-			parametr.col = stoi(textLoad);
-
-
-			fileParametr >> textLoad;
-			parametr.health = stoi(textLoad);
-			fileParametr >> textLoad;
-			parametr.maxHealth = stoi(textLoad);
-
-			fileParametr >> textLoad;
-			parametr.damage = stoi(textLoad);
-			fileParametr >> textLoad;
-			parametr.maxDamage = stoi(textLoad);
-
-			fileParametr >> textLoad;
-			parametr.speed = stoi(textLoad);
-			fileParametr >> textLoad;
-			parametr.maxSpeed = stoi(textLoad);
-
-			fileParametr >> textLoad;
-			parametr.levelHp = stoi(textLoad);
-			fileParametr >> textLoad;
-			parametr.levelDmg = stoi(textLoad);
-			fileParametr >> textLoad;
-			parametr.levelSp = stoi(textLoad);
-			fileParametr >> textLoad;
-			parametr.maxLevel = stoi(textLoad);
-
-			fileParametr >> textLoad;
-			parametr.sizeInv = stoi(textLoad);
-		}
+		fileBoostEnemy >> textLoad;
+		boostEnemy.boostHp = stoi(textLoad);
+		fileBoostEnemy >> textLoad;
+		boostEnemy.boostDmg = stoi(textLoad);
+		fileBoostEnemy >> textLoad;
+		boostEnemy.boostSp = stoi(textLoad);
 	}
+}
 
-	{
-		ifstream fileBoostEnemy("BoostEnemy.txt");
+void Load(vector<Item>& items, vector<Enemy>& enemies, Player& player, Map& map, Parametr& parametr, Stats& stats, BoostEnemy& boostEnemy) {
+	LoadItems(items);
 
-		if (fileBoostEnemy) {
-			string textLoad;
+	LoadEnemies(enemies, items);
 
-			fileBoostEnemy >> textLoad;
-			boostEnemy.boostHp = stoi(textLoad);
-			fileBoostEnemy >> textLoad;
-			boostEnemy.boostDmg = stoi(textLoad);
-			fileBoostEnemy >> textLoad;
-			boostEnemy.boostSp = stoi(textLoad);
-		}
-	}
+	LoadPlayer(player, items);
 
-	return true;
+	LoadMap(map);
+
+	LoadParametr(parametr);
+
+	LoadStats(stats, items, enemies);
+
+	LoadBoostEnemy(boostEnemy);
 }
 
 void Delete(Player& player, Map& map) {

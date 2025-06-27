@@ -4,6 +4,8 @@
 #include <iostream>
 using namespace std;
 
+#include <vector>
+
 enum TypeItem {
 	None,
 	Heal,
@@ -65,6 +67,8 @@ struct Player {
 };
 
 struct Enemy {
+	int id = 0;
+
 	string name = "Enemy";
 
 	int health = 0;
@@ -102,6 +106,28 @@ struct Parametr {
 	int maxLevel = 4;
 
 	int sizeInv = 8;
+};
+
+struct Stats {
+	int countPlay = 0;
+	int countWin = 0;
+	int countLose = 0;
+
+	int countKillEnemy = 0;
+
+	int countCollectItem = 0;
+	int countUseItem = 0;
+
+	int countPassCell = 0;
+	int countOpenCell = 0;
+
+	vector<bool> GamePlayed;
+	
+	vector<int> EnemyKillCount;
+
+	vector<int> ItemCollectCount;
+
+	vector<int> ItemUseCount;
 };
 
 struct BoostEnemy {
